@@ -58,6 +58,10 @@ Map is a flat object of keys onto values:
 
 ## events
 
+#### `collection.on('ready', function(){})`
+
+called once when the collection is up and running and has the current values loaded
+
 #### `collection.on('action', function(action, key, value){})`
 
 Called when a change has happened to a value in the collection.
