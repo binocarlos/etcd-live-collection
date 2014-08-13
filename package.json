@@ -1,6 +1,6 @@
 {
   "name": "etcd-live-collection",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A local cache of objects that auto-updates from etcd wait listeners",
   "main": "index.js",
   "scripts": {
