@@ -26,17 +26,11 @@ collection.on('ready', function(map){
 	console.dir(collection.values())
 })
 
-collection.on('add', function(key, value){
+// the collection has changed somehow
+collection.on('action', function(action, key, value){
 
 })
 
-collection.on('remove', function(key){
-
-})
-
-collection.on('change', function(){
-
-})
 ```
 
 ## api
