@@ -1,0 +1,25 @@
+{
+  "name": "etcd-live-collection",
+  "version": "0.0.1",
+  "description": "A local cache of objects that auto-updates from etcd wait listeners",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/binocarlos/etcd-live-collection.git"
+  },
+  "keywords": [
+    "etcd",
+    "wait",
+    "collection",
+    "watch"
+  ],
+  "author": "Kai Davenport",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/binocarlos/etcd-live-collection/issues"
+  },
+  "homepage": "https://github.com/binocarlos/etcd-live-collection"
+}
