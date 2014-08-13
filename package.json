@@ -21,5 +21,13 @@
   "bugs": {
     "url": "https://github.com/binocarlos/etcd-live-collection/issues"
   },
-  "homepage": "https://github.com/binocarlos/etcd-live-collection"
+  "homepage": "https://github.com/binocarlos/etcd-live-collection",
+  "devDependencies": {
+    "async": "^0.9.0",
+    "tape": "^2.14.0"
+  },
+  "dependencies": {
+    "etcd-flatten": "0.0.2",
+    "etcdjs": "^1.1.1"
+  }
 }

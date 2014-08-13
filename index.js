@@ -1,69 +1,72 @@
-var hyperprox = require('hyperprox')
+var etcdjs = require('etcdjs')
+var flatten = require('etcd-flatten')
+
 var EventEmitter = require('events').EventEmitter
 var util = require('util')
-var Router = require('./router')
-var Handlers = require('./handlers')
 
-function Flocker(){
-	EventEmitter.call(this)
-	var self = this;	
-	this.router = Router()
-	this.handlers = Handlers()
-
-	// the api handlers that target a specific server
-	// will set the X-FLOCKER-HOST header to do the routing
-	this.backends = hyperprox(function(req, next){
-		if(!req.headers['X-FLOCKER-HOST']){
-			return next('no flocker host found')
+function loadValues(etcd, key, done){
+	etcd.get(key, {
+		recursive:true
+	}, function(err, result){
+		if(err) return done(err)
+		if(!result || !result.node){
+			return done(null, [])
 		}
-		var address = req.headers['X-FLOCKER-HOST'] || ''
-		address = address.indexOf('http')==0 ? address : 'http://' + address
-		next(null, req.headers['X-FLOCKER-HOST'])
+		result = flatten(result.node)
+		done(null, result)
 	})
-
-	this.backendsproxy = this.backends.handler()
-
-	// choose a server for a new container
-	this.handlers.on('route', function(info, next){
-		self.emit('route', info, next)
-	})
-
-	this.handlers.on('map', function(name, container, image, next){
-		self.emit('map', name, container, image, next)
-	})
-
-	// we need a list of servers
-	this.handlers.on('list', function(next){
-		self.emit('list', next)
-	})
-
-	// handle a direct proxy
-	this.handlers.on('proxy', function(req, res, address){
-		req.headers['X-FLOCKER-HOST'] = address
-		self.backendsproxy(req, res)
-	})
-
-	this.router.on('containers:ps', this.handlers.listContainers)
-	this.router.on('containers:create', this.handlers.createContainer)
-	this.router.on('containers:attach', this.handlers.attachContainer)
-	this.router.on('images:create', this.handlers.createImage)
-
-	// this is a generic handler for any request targeted at a specific container name
-	// it expects req.headers['X-FLOCKER-CONTAINER'] to be set
-	this.router.on('containers:targetid', this.handlers.targetid)
 }
 
-util.inherits(Flocker, EventEmitter)
+function LiveCollection(etcd, key){
+	var self = this;
+	EventEmitter.call(this)
+	this._etcd = etcd
+	this._key = key
+	this._values = {}
 
-Flocker.prototype.handler = function(){
-	return this.handle.bind(thid)
+	this.listen()
+	this.refresh(function(){
+		self.emit('ready')
+	})
 }
 
-Flocker.prototype.handle = function(req, res){
-	this.emit('request', req, res)
-	this.router.handler(req, res)
+util.inherits(LiveCollection, EventEmitter)
+
+LiveCollection.prototype.refresh = function(done){
+	var self = this;
+	loadValues(this._etcd, this._key, function(err, values){
+		if(err) return done(err)
+		self._values = values || {}
+		done()
+	})
 }
 
-module.exports = function(){
-	return new Flocker()
+LiveCollection.prototype.listen = function(){
+	var self = this;
+
+	function onChange(err, result, next) {
+		if(err) return next(onChange)
+		if(!result) return next(onChange)
+
+		self.refresh(function(){
+			self.emit('action', result.action, result.node.key, result.node.value)
+			next(onChange)
+		})
+	}
+
+	this._etcd.wait(this._key, {
+		recursive:true
+	}, onChange)
+}
+
+
+LiveCollection.prototype.values = function(){
+	return this._values
+}
+
+module.exports = function(etcd, key){
+	if(typeof(etcd)=='string'){
+		etcd = etcdjs(etcd)
+	}
+	return new LiveCollection(etcd, key)
 }

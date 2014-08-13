@@ -45,11 +45,32 @@ tape('write initial values', function(t){
 tape('check the collection as etcd events happen', function(t){
 	var collection = Collection(etcd, '/fruit')
 
+	collection.on('action', function(action, key, value){
+		var vals = collection.values()
+		if(action=='set'){
+			t.equal(key, '/fruit/pear', 'pear key')
+			t.equal(value, 'yum', 'pear value')
+			t.equal(Object.keys(vals).length, 3, 'there are 3 values now')
+		}
+		else if(action=='delete'){
+			t.equal(key, '/fruit/apples')
+			t.equal(Object.keys(vals).length, 2, 'there are 2 values now')
+			t.end()
+			process.exit()
+		}
+	})
+
 	collection.on('ready', function(){
 		var vals = collection.values()
 
-		console.log('-------------------------------------------');
-		console.dir(vals)
-		process.exit()
+		t.equal(vals['/fruit/oranges/satsuma'], 'orange')
+		t.equal(vals['/fruit/apples'], 'green')
+
+		etcd.set('/fruit/pear', 'yum', function(err){
+			etcd.del('/fruit/apples', function(err){
+				
+			})
+		})
+
 	})
 })

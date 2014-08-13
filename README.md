@@ -34,7 +34,7 @@ collection.on('remove', function(key){
 
 })
 
-collection.on('change', function(key, value){
+collection.on('change', function(){
 
 })
 ```
@@ -64,17 +64,9 @@ Map is a flat object of keys onto values:
 
 ## events
 
-#### `collection.on('add', function(key, value){})`
+#### `collection.on('action', function(action, key, value){})`
 
-Called when a new value is added to the collection
-
-#### `collection.on('remove', function(key){})`
-
-Called when a new value is added to the collection
-
-#### `collection.on('change', function(key, action, value){})`
-
-Called when a value is changed - either added, updated or removed
+Called when a change has happened to a value in the collection.
 
 ## license
 
