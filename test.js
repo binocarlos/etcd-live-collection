@@ -15,11 +15,6 @@ tape('reset etcd', function(t){
 	etcd.del(baseKey, {
 		recursive:true
 	}, function(err){
-		if(err){
-			t.fail(err, 'del keys')
-			t.end()
-			return
-		}
 		t.end()
 	})
 })
@@ -67,9 +62,13 @@ tape('check the collection as etcd events happen', function(t){
 		t.equal(vals['/fruit/apples'], 'green')
 
 		etcd.set('/fruit/pear', 'yum', function(err){
-			etcd.del('/fruit/apples', function(err){
-				
-			})
+
+			setTimeout(function(){
+				etcd.del('/fruit/apples', function(err){
+					
+				})	
+			}, 150)
+			
 		})
 
 	})
