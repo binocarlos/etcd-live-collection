@@ -48,10 +48,13 @@ LiveCollection.prototype.listen = function(){
 		if(err) return next(onChange)
 		if(!result) return next(onChange)
 
-		self.refresh(function(){
-			self.emit('action', result.action, result.node.key, result.node.value)
-			next(onChange)
-		})
+		setTimeout(function(){
+			self.refresh(function(){
+				self.emit('action', result.action, result.node.key, result.node.value)
+				next(onChange)
+			})	
+		}, 100)
+		
 	}
 
 	this._etcd.wait(this._key, {
